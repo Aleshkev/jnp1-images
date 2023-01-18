@@ -13,11 +13,11 @@
 //     compose(f, g)(x) == g(f(x))
 //     itd.
 //
-auto compose() {
+template<typename _T = nullptr_t> auto compose() {
   return [=](auto x) { return x; };
 }
 template <typename F> auto compose(F f) {
-  return [=](auto x) { return f(x); };
+  return f;
 }
 template <typename F, typename G, typename... H>
 auto compose(F f, G g, H &&...h) {

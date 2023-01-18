@@ -4,6 +4,7 @@
 #include "functional.h"
 #include "images.h"
 #include <cassert>
+#include <iostream>
 #include <cmath> // M_PI
 #include <cstdint>
 
@@ -83,4 +84,11 @@ main()
   const auto f2 = [](auto p) {auto b = p; return b;};
   assert(lift(h1, f1, f2)(42) == 42 * 42);
   assert(lift(h2, f1, f2)(42) == 42 + 42);
+
+
+  auto f = [](auto s) { return std::string ("f(") + s + ")"; };
+  auto g = [](auto s) { return std::string("g(") + s + ")"; };
+  auto h = [](auto s) { return std::string("h(") + s + ")"; };
+  std::cout << compose(f, g, h)("x") << std::endl;
+
 }
