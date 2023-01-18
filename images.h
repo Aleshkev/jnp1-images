@@ -20,10 +20,7 @@ const Point as_polar(const Point &p);
 // Zamienia punkt żeby na pewno nie był we współrzędnych biegunowych.
 const Point as_cartesian(const Point &p);
 
-template <typename T, typename... A>
-auto constant(const T &x) {
-  return [=](A...) { return x; };
-}
+// Tworzy funkcję decydującą według tego co dostanie, którą wartość zwrócić.
 template <typename T>
 auto choose(const T &a, const T &b) {
   return [=](bool condition) { return condition ? a : b; };
@@ -57,12 +54,7 @@ using Image = Base_image<Color>;
 // parametrem typu Fraction.
 using Blend = Base_image<Fraction>;
 
-// Korzysta z regionu (wycinanki), który wycina i klei dwa obrazy właściwe,
-// tworząc w ten sposób nowy. Dla punktów p, takich że region(p) == true, brany
-// jest obraz this_way, zaś dla pozostałych – that_way.
-Image cond(Region region, Image this_way, Image that_way);
-
-// Base_image<T> constant(T t) – tworzy stały obraz bazowy, a więc zwracający:
+// Base_image<T> const_fn(T t) – tworzy stały obraz bazowy, a więc zwracający:
 //
 // - wartość true w przypadku regionu dla t == true,
 // - kolor „cynober” w przypadku obrazu właściwego  dla t == Colors::
@@ -86,7 +78,7 @@ Base_image<T> rotate(Base_image<T> image, double phi) {
 // Przesuwa obraz bazowy o wektor v. Kierunek przesunięcia można określić na
 // podstawie pliku translate.bmp.
 template <typename T>
-Base_image<T> translate(Base_image<T> image, Vector v) {
+Base_image<T> translate(Base_image<T> image, const Vector &v) {
   return compose(
       Detail::as_cartesian,
       [=](const Point p) {
@@ -108,8 +100,8 @@ Base_image<T> scale(Base_image<T> image, double s) {
 // Tworzy obraz bazowy koła o środku q, promieniu r oraz zwracanych wartościach
 // inner w kole i na obwodzie oraz outer poza nim.
 template <typename T>
-Base_image<T> circle(Point q, double r, T inner, T outer) {
-  auto q_cartesian = Detail::as_cartesian(q);
+Base_image<T> circle(const Point q, double r, const T &inner, const T &outer) {
+  const auto q_cartesian = Detail::as_cartesian(q);
   return compose(
       Detail::as_cartesian,
       [=](const Point p) { return distance(p, q_cartesian) <= r; },
@@ -121,7 +113,7 @@ Base_image<T> circle(Point q, double r, T inner, T outer) {
 // that_way należy wydedukować na podstawie plików example.cc oraz
 // checker.bmp.
 template <typename T>
-Base_image<T> checker(double d, T this_way, T that_way) {
+Base_image<T> checker(double d, const T &this_way, const T &that_way) {
   return compose(
       Detail::as_cartesian,
       [=](const Point p) {
@@ -139,18 +131,19 @@ Base_image<T> checker(double d, T this_way, T that_way) {
 // założyć, że użytkownik będzie wywoływać funkcję z argumentem n o parzystej
 // wartości.
 template <typename T>
-Base_image<T> polar_checker(double d, int n, T this_way, T that_way) {
+Base_image<T> polar_checker(double d, int n, const T &this_way,
+                            const T &that_way) {
   assert(n % 2 == 0);
 
-  auto arc = M_PI / n * 2;  // Kąt jaki zajmuje jedno pole szachownicy.
+  const auto arc = M_PI / n * 2;  // Kąt jaki zajmuje jedno pole szachownicy.
 
   return compose(
       Detail::as_polar,
       [=](const Point p) {
-        auto x = p.first;
+        const auto x = p.first;
 
         // Dodajemy 2 * n * arc, żeby na pewno dostać dodatni kąt.
-        auto y = floor((p.second + 2 * n * arc) / arc) * d;
+        const auto y = floor((p.second + 2 * n * arc) / arc) * d;
 
         return Point(x, y);
       },
@@ -161,13 +154,13 @@ Base_image<T> polar_checker(double d, int n, T this_way, T that_way) {
 // w punkcie q. Położenie this_way i that_way należy wydedukować na podstawie
 // plików example.cc oraz rings.bmp.
 template <typename T>
-Base_image<T> rings(Point q, double d, T this_way, T that_way) {
-  auto q_cartesian = Detail::as_cartesian(q);
+Base_image<T> rings(Point q, double d, const T &this_way, const T &that_way) {
+  const auto q_cartesian = Detail::as_cartesian(q);
   return compose(
       Detail::as_cartesian,
       [=](const Point p) {
-        auto distance_from_center = distance(p, q_cartesian);
-        size_t circle_i = std::floor(distance_from_center / d);
+        const auto distance_from_center = distance(p, q_cartesian);
+        const size_t circle_i = std::floor(distance_from_center / d);
         return circle_i % 2 == 0;
       },
       Detail::choose(this_way, that_way));
@@ -176,12 +169,17 @@ Base_image<T> rings(Point q, double d, T this_way, T that_way) {
 // Obraz bazowy w postaci wycentrowanego paska this_way o szerokości d
 // otoczonego przez that_way.
 template <typename T>
-Base_image<T> vertical_stripe(double d, T this_way, T that_way) {
+Base_image<T> vertical_stripe(double d, const T &this_way, const T &that_way) {
   return compose(
       Detail::as_cartesian,
       [=](const Point p) { return std::abs(p.first) <= d / 2; },
       Detail::choose(this_way, that_way));
 }
+
+// Korzysta z regionu (wycinanki), który wycina i klei dwa obrazy właściwe,
+// tworząc w ten sposób nowy. Dla punktów p, takich że region(p) == true, brany
+// jest obraz this_way, zaś dla pozostałych – that_way.
+Image cond(Region region, Image this_way, Image that_way);
 
 // Korzysta z mieszanki, która wyznacza proporcje mieszania kolorów dwóch
 // obrazów właściwych, tworząc w ten sposób nowy. Dla każdego punktu p argument
