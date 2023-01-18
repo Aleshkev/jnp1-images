@@ -71,7 +71,7 @@ Image cond(Region region, Image this_way, Image that_way);
 //
 template <typename T>
 Base_image<T> constant(const T &t) {
-  return [=](const Point point) { return t; };
+  return [=](const Point) { return t; };
 }
 
 // Obraca obraz bazowy o kąt phi (wyrażony w radianach). Kierunek obrotu można

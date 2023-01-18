@@ -56,7 +56,7 @@ auto compose(F f, G g, H &&...h) {
 //  naturalna.
 
 template <typename H> auto lift(H h) {
-  return [=](auto p) { return h(); };
+  return [=](auto) { return h(); };
 }
 
 template <typename H, typename F, typename... G> auto lift(H h, F f, G &&...g) {
