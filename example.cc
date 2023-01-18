@@ -1,9 +1,10 @@
-#include "functional.h"
-#include "images.h"
 #include "bmp.h"
 #include "color.h"
 #include "coordinate.h"
+#include "functional.h"
+#include "images.h"
 #include <cassert>
+#include <cmath> // M_PI
 #include <cstdint>
 
 int
@@ -13,7 +14,7 @@ main()
   const uint32_t height = 300;
   const Region rc = circle(Point(50., 100.), 10., true, false);
   const Image vs = vertical_stripe(100, Colors::Vermilion, Colors::blue);
-  const Blend cb = constant<Fraction>(.42);
+  const Blend cb = constant<Fraction>((double).42);
 
   create_BMP("constant.bmp",
              width,
@@ -43,6 +44,10 @@ main()
              width,
              height,
              polar_checker(10., 4, Colors::Vermilion, Colors::blue));
+  create_BMP("polar_checker_2.bmp",
+             width,
+             height,
+             polar_checker(10., 6, Colors::Vermilion, Colors::blue));
   create_BMP("rings.bmp",
              width,
              height,

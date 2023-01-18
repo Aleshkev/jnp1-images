@@ -10,3 +10,4 @@
 cmake-build-debug/
 .name
 .idea
+/cmake-build-debug/
